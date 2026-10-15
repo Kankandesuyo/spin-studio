@@ -10,6 +10,7 @@
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./ui.css">
   <link rel="stylesheet" href="./glass.css">
+  <link rel="stylesheet" href="./power.css">
   <script type="module" src="./app.js"></script>
 </head>
 <body>
@@ -41,6 +42,7 @@
         </svg>
       </div>
       <div class="result" aria-live="polite"><span id="result-caption" hidden></span><strong id="result">准备好了就开始</strong></div>
+      <div class="power-control"><div><label for="power">转动力度</label><output id="power-value" for="power">50% · 适中</output></div><input id="power" type="range" min="1" max="100" step="1" value="50" aria-valuetext="50%，适中"><div class="power-hints"><span>轻轻一拨</span><span>用力一转</span></div></div>
       <button id="spin" class="spin-button" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 4 13 8-13 8Z"/></svg><span>开始转动</span></button>
       <div class="stage-footer"><label class="sound-control"><input id="sound" type="checkbox">播放转动音效</label></div>
     </section>

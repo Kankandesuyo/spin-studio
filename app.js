@@ -1,10 +1,13 @@
-import {MAX_ITEMS,PALETTE,defaults,validate,sectorsFor,normalize,selectedIndex,polar,sectorPath,stopAngle,ease} from './core.js';
+import {MAX_ITEMS,PALETTE,defaults,validate,sectorsFor,normalize,selectedIndex,polar,sectorPath,spinMotion,ease} from './core.js';
 import {createWheelSound} from './sound.js';
 const $=id=>document.getElementById(id),ns='http://www.w3.org/2000/svg',storageKey='spin-studio-v1';
 let items=defaults(),rotation=0,busy=false,sectors=[],labels=[],audio=null,wheelSound=null,pointerAnimation=null,spinId=0;
 const spin=$('spin'),itemList=$('items'),error=$('error');
-try{const saved=JSON.parse(localStorage.getItem(storageKey));if(saved&&!validate(saved.items)){items=saved.items.map(x=>({label:x.label,weight:Number(x.weight)}));$('sound').checked=saved.sound===true;}}catch{}
-function save(){try{localStorage.setItem(storageKey,JSON.stringify({items,sound:$('sound').checked}));$('save-state').textContent='已保存';}catch{$('save-state').textContent='仅当前页面有效';}}
+try{const saved=JSON.parse(localStorage.getItem(storageKey));if(saved&&!validate(saved.items)){items=saved.items.map(x=>({label:x.label,weight:Number(x.weight)}));$('sound').checked=saved.sound===true;if(Number.isInteger(saved.power)&&saved.power>=1&&saved.power<=100)$('power').value=saved.power;}}catch{}
+function save(){try{localStorage.setItem(storageKey,JSON.stringify({items,sound:$('sound').checked,power:Number($('power').value)}));$('save-state').textContent='已保存';}catch{$('save-state').textContent='仅当前页面有效';}}
+function updatePower(){const power=Number($('power').value),name=power<=30?'轻拨':power<=70?'适中':'强力';$('power-value').textContent=power+'% · '+name;$('power').setAttribute('aria-valuetext',power+'%，'+name);$('power').style.setProperty('--power-fill',((power-1)/99*100)+'%');}
+$('power').addEventListener('input',()=>{updatePower();save();});
+updatePower();
 function svg(name,attributes={}){const el=document.createElementNS(ns,name);for(const [key,value] of Object.entries(attributes))el.setAttribute(key,value);return el;}
 function color(i){return PALETTE[i%PALETTE.length];}
 function showError(message){error.hidden=!message;error.textContent=message;spin.disabled=!!message||busy;}
@@ -71,7 +74,7 @@ $('add').addEventListener('click',()=>changeCount(items.length+1));
 $('equal').addEventListener('click',()=>{if(busy)return;items.forEach(item=>item.weight=1);renderEditor();update();});
 $('reset').addEventListener('click',()=>{if(busy)return;items=defaults();rotation=0;renderEditor();update();});
 $('sound').addEventListener('change',()=>{save();if($('sound').checked)prepareSound();});
-function lock(value){busy=value;document.body.classList.toggle('spinning',value);document.querySelectorAll('.editor input,.editor button').forEach(el=>el.disabled=value);spin.disabled=value;spin.querySelector('span').textContent=value?'转动中…':'再转一次';if(!value)updateDisabled();}
+function lock(value){busy=value;document.body.classList.toggle('spinning',value);document.querySelectorAll('.editor input,.editor button').forEach(el=>el.disabled=value);$('power').disabled=value;spin.disabled=value;spin.querySelector('span').textContent=value?'转动中…':'再转一次';if(!value)updateDisabled();}
 function updateDisabled(){$('add').disabled=items.length>=MAX_ITEMS;itemList.querySelectorAll('.remove').forEach(el=>el.disabled=items.length<=2);}
 function prepareSound(){if(!$('sound').checked)return;try{audio||=new(window.AudioContext||window.webkitAudioContext)();wheelSound||=createWheelSound(audio);audio.resume().catch(()=>{});}catch{}}
 function tick(){if(!$('sound').checked||!wheelSound)return;try{wheelSound.tick();}catch{}}
@@ -81,8 +84,9 @@ spin.addEventListener('click',()=>{
   const proposed=Number($('count').value);if(proposed!==items.length){changeCount(proposed);if(proposed!==items.length)return;}
   prepareSound();
   const r=new Uint32Array(2);crypto.getRandomValues(r);
-  const start=rotation,end=stopAngle(start,r[0]/4294967296),distance=end-start;
-  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches,duration=reduced?0:5200+1800*r[1]/4294967296;
+  const motion=spinMotion(Number($('power').value),r[0]/4294967296,r[1]/4294967296);
+  const start=rotation,distance=motion.distance,end=start+distance;
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches,duration=reduced?0:motion.duration;
   let began=null,previous=selectedIndex(sectors,start);const currentSpin=++spinId;
   lock(true);$('result-caption').hidden=true;$('result').parentElement.classList.remove('has-result');$('result').textContent='正在转动，等待指针停稳…';
   function frame(now){

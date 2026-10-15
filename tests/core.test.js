@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {defaults,validate,sectorsFor,selectedIndex,normalize,stopAngle,ease} from '../core.js';
+import {defaults,validate,sectorsFor,selectedIndex,normalize,stopAngle,spinMotion,ease} from '../core.js';
 test('默认十份，换与不换各五份',()=>{const a=defaults();assert.equal(a.length,10);assert.equal(a.filter(x=>x.label==='换').length,5);assert.equal(validate(a),'');});
 test('权重 1:3 对应 90 和 270 度，抽取按面积',()=>{const s=sectorsFor([{label:'A',weight:1},{label:'B',weight:3}]);assert.equal(s[0].sweep,90);assert.equal(s[1].sweep,270);const counts=[0,0];for(let i=0;i<36000;i++)counts[selectedIndex(s,i/100+.001)]++;assert.deepEqual(counts,[9000,27000]);});
 test('极小扇区、跨零和大角度均准确定位',()=>{const s=sectorsFor([{label:'a',weight:.01},{label:'b',weight:10000},{label:'c',weight:2}]);for(const x of s){assert.equal(selectedIndex(s,-90-x.mid),x.index);assert.equal(selectedIndex(s,-90-x.mid+360000),x.index);}assert.ok(Math.abs(s.reduce((n,x)=>n+x.sweep,0)-360)<1e-10);});
 test('无效内容和非正数权重被拒绝',()=>{for(const v of [0,-1,NaN,Infinity,'',10001])assert.ok(validate([{label:'A',weight:v},{label:'B',weight:1}]));assert.ok(validate([{label:' ',weight:1},{label:'B',weight:1}]));assert.ok(validate(Array(31).fill({label:'A',weight:1})));});
 test('停点来自连续随机角度；减速单调，末速趋零',()=>{assert.equal(stopAngle(12,0),1812);assert.equal(stopAngle(12,.5),2532);assert.equal(ease(0),0);assert.equal(ease(1),1);let previous=-1;for(let i=0;i<=100;i++){assert.ok(ease(i/100)>=previous);previous=ease(i/100);}assert.ok(ease(1)-ease(.99)<ease(.5)-ease(.49));assert.equal(normalize(-36),324);});
+test('力度改变圈数、初速和时长，各档位仍按面积抽取',()=>{const low=spinMotion(1,.5,.5),high=spinMotion(100,.5,.5);assert.ok(high.distance>low.distance);assert.ok(high.duration>low.duration);assert.ok(high.distance/high.duration>low.distance/low.duration);const sectors=sectorsFor([{label:'A',weight:1},{label:'B',weight:3}]);for(const power of [1,30,50,70,100]){const counts=[0,0];for(let i=0;i<36000;i++)counts[selectedIndex(sectors,17+spinMotion(power,(i+.5)/36000).distance)]++;assert.deepEqual(counts,[9000,27000]);}});

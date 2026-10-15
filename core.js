@@ -21,4 +21,9 @@ export function selectedIndex(sectors,rotation){
 export function polar(deg,r=250){const a=deg*Math.PI/180;return [300+Math.cos(a)*r,300+Math.sin(a)*r];}
 export function sectorPath(sector){const p=polar(sector.start),q=polar(sector.start+sector.sweep);return `M300 300 L${p.join(' ')} A250 250 0 ${sector.sweep>180?1:0} 1 ${q.join(' ')} Z`;}
 export function stopAngle(start,unit){return start+1800+1440*unit;}
+export function spinMotion(power,unit,jitter=0){
+  const strength=(Math.min(100,Math.max(1,Number(power)||50))-1)/99;
+  // One complete uniform turn preserves area-based probabilities at every strength.
+  return {distance:360*(2+10*strength+unit),duration:2600+5000*strength+400*jitter};
+}
 export function ease(t){return 2*t-t*t;}
