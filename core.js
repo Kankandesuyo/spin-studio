@@ -27,3 +27,9 @@ export function spinMotion(power,unit,jitter=0){
   return {distance:360*(2+10*strength+unit),duration:2600+5000*strength+400*jitter};
 }
 export function ease(t){return 2*t-t*t;}
+export function releaseMotion(velocity){
+  const speed=Math.min(1.8,Math.abs(velocity));
+  if(speed<.02)return {distance:0,duration:0};
+  const duration=Math.min(6500,Math.max(250,speed/.0003));
+  return {distance:Math.sign(velocity)*speed*duration/2,duration};
+}

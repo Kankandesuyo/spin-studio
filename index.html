@@ -19,8 +19,8 @@
     <section class="stage" aria-labelledby="wheel-title">
       <div class="stage-heading"><div><h1 id="wheel-title">今天，转个决定。</h1><p>自定义每一份，让随机刚刚好。</p></div><span id="segment-summary" class="sr-only">10 份</span></div>
       <div class="wheel-wrap">
-        <svg id="wheel" viewBox="0 0 600 620" role="img" aria-labelledby="wheel-name wheel-desc">
-          <title id="wheel-name">自定义随机转盘</title><desc id="wheel-desc">10 个扇区，5 份换和 5 份不换，各占百分之五十。顶部指针指向最终结果。</desc>
+        <svg id="wheel" viewBox="0 0 600 620" role="button" tabindex="0" aria-labelledby="wheel-name wheel-desc">
+          <title id="wheel-name">直接拖动转盘，松手继续旋转；也可按回车随机转动</title><desc id="wheel-desc">10 个扇区，5 份换和 5 份不换，各占百分之五十。顶部指针指向最终结果。</desc>
           <defs>
             <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffffff" stop-opacity=".98"/><stop offset=".23" stop-color="#eff7ff" stop-opacity=".45"/><stop offset=".43" stop-color="#ffffff" stop-opacity=".9"/><stop offset=".7" stop-color="#d0e5ff" stop-opacity=".4"/><stop offset="1" stop-color="#ffffff" stop-opacity=".88"/></linearGradient>
             <radialGradient id="hub" cx=".3" cy=".2"><stop stop-color="#fff" stop-opacity=".98"/><stop offset=".55" stop-color="#f7fbff" stop-opacity=".7"/><stop offset=".85" stop-color="#bbd5f7" stop-opacity=".6"/><stop offset="1" stop-color="#fff" stop-opacity=".92"/></radialGradient>
@@ -41,7 +41,7 @@
           <g id="pointer"><path d="M286 17 Q280 17 284 24 L297 43 Q300 48 303 43 L316 24 Q320 17 314 17 Z" fill="url(#pointer-fill)" stroke="#ffffff" stroke-width="1.5"/></g>
         </svg>
       </div>
-      <div class="result" aria-live="polite"><span id="result-caption" hidden></span><strong id="result">准备好了就开始</strong></div>
+      <div class="result" aria-live="polite"><span id="result-caption" hidden></span><strong id="result">拖动转盘，松手开转</strong></div>
       <div class="power-control"><div><label for="power">转动力度</label><output id="power-value" for="power">50% · 适中</output></div><input id="power" type="range" min="1" max="100" step="1" value="50" aria-valuetext="50%，适中"><div class="power-hints"><span>轻轻一拨</span><span>用力一转</span></div></div>
       <button id="spin" class="spin-button" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 4 13 8-13 8Z"/></svg><span>开始转动</span></button>
       <div class="stage-footer"><label class="sound-control"><input id="sound" type="checkbox">播放转动音效</label></div>

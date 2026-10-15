@@ -1,5 +1,6 @@
-import {MAX_ITEMS,PALETTE,defaults,validate,sectorsFor,normalize,selectedIndex,polar,sectorPath,spinMotion,ease} from './core.js';
+import {MAX_ITEMS,PALETTE,defaults,validate,sectorsFor,normalize,selectedIndex,polar,sectorPath,spinMotion,releaseMotion,ease} from './core.js';
 import {createWheelSound} from './sound.js';
+import {attachWheelDrag} from './gestures.js';
 const $=id=>document.getElementById(id),ns='http://www.w3.org/2000/svg',storageKey='spin-studio-v1';
 let items=defaults(),rotation=0,busy=false,sectors=[],labels=[],audio=null,wheelSound=null,pointerAnimation=null,spinId=0;
 const spin=$('spin'),itemList=$('items'),error=$('error');
@@ -32,7 +33,7 @@ function drawWheel(){
 }
 function update(){
   const message=validate(items);showError(message);
-  if(!message){drawWheel();save();$('result-caption').hidden=true;$('result').parentElement.classList.remove('has-result');$('result').textContent='准备好了就开始';}
+  if(!message){drawWheel();save();$('result-caption').hidden=true;$('result').parentElement.classList.remove('has-result');$('result').textContent='拖动转盘，松手开转';}
   else $('save-state').textContent='请完善配置';
   const total=items.reduce((s,x)=>s+(Number(x.weight)||0),0);
   itemList.querySelectorAll('.percentage').forEach((el,i)=>{el.textContent=Number(items[i].weight)>0&&total>0?(Number(items[i].weight)/total*100).toFixed(1)+'%':'—';});
@@ -78,13 +79,7 @@ function lock(value){busy=value;document.body.classList.toggle('spinning',value)
 function updateDisabled(){$('add').disabled=items.length>=MAX_ITEMS;itemList.querySelectorAll('.remove').forEach(el=>el.disabled=items.length<=2);}
 function prepareSound(){if(!$('sound').checked)return;try{audio||=new(window.AudioContext||window.webkitAudioContext)();wheelSound||=createWheelSound(audio);audio.resume().catch(()=>{});}catch{}}
 function tick(){if(!$('sound').checked||!wheelSound)return;try{wheelSound.tick();}catch{}}
-spin.addEventListener('click',()=>{
-  if(busy)return;
-  const message=validate(items);if(message){showError(message);return;}
-  const proposed=Number($('count').value);if(proposed!==items.length){changeCount(proposed);if(proposed!==items.length)return;}
-  prepareSound();
-  const r=new Uint32Array(2);crypto.getRandomValues(r);
-  const motion=spinMotion(Number($('power').value),r[0]/4294967296,r[1]/4294967296);
+function animateMotion(motion,mode='random'){
   const start=rotation,distance=motion.distance,end=start+distance;
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches,duration=reduced?0:motion.duration;
   let began=null,previous=selectedIndex(sectors,start);const currentSpin=++spinId;
@@ -97,12 +92,31 @@ spin.addEventListener('click',()=>{
     if(previous!==selected&&!reduced){previous=selected;tick();if(pointerAnimation)pointerAnimation.cancel();pointerAnimation=$('pointer').animate([{transform:'rotate(0deg)'},{transform:'rotate(-20deg)',offset:.25},{transform:'rotate(6deg)',offset:.7},{transform:'rotate(0deg)'}],{duration:125,easing:'ease-out'});}
     if(t<1){requestAnimationFrame(frame);return;}
     rotation=normalize(end);updatePositions();const item=sectors[selectedIndex(sectors,rotation)];
-    $('result-caption').textContent=`本次结果 · 第 ${item.index+1} 份 · 占比 ${(item.probability*100).toFixed(2)}%`;
+    $('result-caption').textContent=`${mode==='manual'?'手动拨转':'随机抽取'} · 第 ${item.index+1} 份 · 占比 ${(item.probability*100).toFixed(2)}%`;
     $('result-caption').hidden=false;$('result').parentElement.classList.add('has-result');
     $('result').textContent=item.label;lock(false);
   }
   requestAnimationFrame(frame);
+}
+function canBegin(){
+  if(busy)return false;
+  const message=validate(items);if(message){showError(message);return false;}
+  const proposed=Number($('count').value);if(proposed!==items.length){changeCount(proposed);if(proposed!==items.length)return false;}
+  return true;
+}
+spin.addEventListener('click',()=>{
+  if(!canBegin())return;prepareSound();
+  const r=new Uint32Array(2);crypto.getRandomValues(r);
+  animateMotion(spinMotion(Number($('power').value),r[0]/4294967296,r[1]/4294967296));
 });
+attachWheelDrag($('wheel'),{
+  canStart:canBegin,
+  onStart(){prepareSound();lock(true);$('result-caption').hidden=true;$('result').parentElement.classList.remove('has-result');$('result').textContent='松手后，转盘会继续滑行';},
+  onRotate(delta){const previous=selectedIndex(sectors,rotation);rotation+=delta;updatePositions();if(selectedIndex(sectors,rotation)!==previous)tick();},
+  onRelease(velocity){animateMotion(releaseMotion(velocity),'manual');},
+  onCancel(){rotation=normalize(rotation);updatePositions();lock(false);$('result').textContent='沿着转盘边缘拨动试试';}
+});
+$('wheel').addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();if(!busy)spin.click();}});
 // Light follows the pointer only on the primary interactive glass surface.
 let shineFrame=0,shinePoint=null;
 spin.addEventListener('pointermove',event=>{
