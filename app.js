@@ -2,7 +2,7 @@ import {MAX_ITEMS,PALETTE,defaults,validate,sectorsFor,normalize,selectedIndex,p
 import {createWheelSound} from './sound.js';
 import {attachWheelDrag} from './gestures.js';
 const $=id=>document.getElementById(id),ns='http://www.w3.org/2000/svg',storageKey='spin-studio-v1';
-let items=defaults(),rotation=0,busy=false,sectors=[],labels=[],audio=null,wheelSound=null,pointerAnimation=null,spinId=0;
+let items=defaults(),rotation=0,busy=false,sectors=[],labels=[],audio=null,wheelSound=null,pointerAnimation=null,spinId=0,angularVelocity=0,interruptedVelocity=null;
 const spin=$('spin'),itemList=$('items'),error=$('error');
 try{const saved=JSON.parse(localStorage.getItem(storageKey));if(saved&&!validate(saved.items)){items=saved.items.map(x=>({label:x.label,weight:Number(x.weight)}));$('sound').checked=saved.sound===true;if(Number.isInteger(saved.power)&&saved.power>=1&&saved.power<=100)$('power').value=saved.power;}}catch{}
 function save(){try{localStorage.setItem(storageKey,JSON.stringify({items,sound:$('sound').checked,power:Number($('power').value)}));$('save-state').textContent='已保存';}catch{$('save-state').textContent='仅当前页面有效';}}
@@ -83,15 +83,17 @@ function animateMotion(motion,mode='random'){
   const start=rotation,distance=motion.distance,end=start+distance;
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches,duration=reduced?0:motion.duration;
   let began=null,previous=selectedIndex(sectors,start);const currentSpin=++spinId;
-  lock(true);$('result-caption').hidden=true;$('result').parentElement.classList.remove('has-result');$('result').textContent='正在转动，等待指针停稳…';
+  angularVelocity=duration>0?2*distance/duration:0;
+  lock(true);$('result-caption').hidden=true;$('result').parentElement.classList.remove('has-result');$('result').textContent='转动中也可以继续拨动';
   function frame(now){
     if(currentSpin!==spinId)return;
     if(began===null)began=now;
     const t=duration===0?1:Math.min(1,(now-began)/duration);rotation=start+distance*ease(t);updatePositions();
+    angularVelocity=duration>0?2*distance*(1-t)/duration:0;
     const selected=selectedIndex(sectors,rotation);
     if(previous!==selected&&!reduced){previous=selected;tick();if(pointerAnimation)pointerAnimation.cancel();pointerAnimation=$('pointer').animate([{transform:'rotate(0deg)'},{transform:'rotate(-20deg)',offset:.25},{transform:'rotate(6deg)',offset:.7},{transform:'rotate(0deg)'}],{duration:125,easing:'ease-out'});}
     if(t<1){requestAnimationFrame(frame);return;}
-    rotation=normalize(end);updatePositions();const item=sectors[selectedIndex(sectors,rotation)];
+    angularVelocity=0;rotation=normalize(end);updatePositions();const item=sectors[selectedIndex(sectors,rotation)];
     $('result-caption').textContent=`${mode==='manual'?'手动拨转':'随机抽取'} · 第 ${item.index+1} 份 · 占比 ${(item.probability*100).toFixed(2)}%`;
     $('result-caption').hidden=false;$('result').parentElement.classList.add('has-result');
     $('result').textContent=item.label;lock(false);
@@ -110,11 +112,11 @@ spin.addEventListener('click',()=>{
   animateMotion(spinMotion(Number($('power').value),r[0]/4294967296,r[1]/4294967296));
 });
 attachWheelDrag($('wheel'),{
-  canStart:canBegin,
-  onStart(){prepareSound();lock(true);$('result-caption').hidden=true;$('result').parentElement.classList.remove('has-result');$('result').textContent='松手后，转盘会继续滑行';},
+  canStart(){return busy||canBegin();},
+  onStart(){interruptedVelocity=busy?angularVelocity:null;++spinId;angularVelocity=0;if(pointerAnimation)pointerAnimation.cancel();prepareSound();lock(true);$('result-caption').hidden=true;$('result').parentElement.classList.remove('has-result');$('result').textContent='继续拨动，松手后接着转';},
   onRotate(delta){const previous=selectedIndex(sectors,rotation);rotation+=delta;updatePositions();if(selectedIndex(sectors,rotation)!==previous)tick();},
-  onRelease(velocity){animateMotion(releaseMotion(velocity),'manual');},
-  onCancel(){rotation=normalize(rotation);updatePositions();lock(false);$('result').textContent='沿着转盘边缘拨动试试';}
+  onRelease(velocity){interruptedVelocity=null;animateMotion(releaseMotion(velocity),'manual');},
+  onCancel(){if(interruptedVelocity!==null){const velocity=interruptedVelocity;interruptedVelocity=null;animateMotion(releaseMotion(velocity),'manual');return;}rotation=normalize(rotation);updatePositions();lock(false);$('result').textContent='沿着转盘边缘拨动试试';}
 });
 $('wheel').addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();if(!busy)spin.click();}});
 // Light follows the pointer only on the primary interactive glass surface.
