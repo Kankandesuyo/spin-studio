@@ -1,4 +1,4 @@
-import {MAX_ITEMS,PALETTE,defaults,validate,sectorsFor,normalize,selectedIndex,polar,sectorPath,spinMotion,releaseMotion,ease} from './core.js';
+import {MAX_ITEMS,PALETTE,defaults,validate,sectorsFor,normalize,selectedIndex,polar,sectorPath,spinMotion,releaseMotion,ease} from './core.js?v=drag-v1';
 import {createWheelSound} from './sound.js';
 import {attachWheelDrag} from './gestures.js';
 const $=id=>document.getElementById(id),ns='http://www.w3.org/2000/svg',storageKey='spin-studio-v1';
