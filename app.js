@@ -1,6 +1,7 @@
 import {MAX_ITEMS,PALETTE,defaults,validate,sectorsFor,normalize,selectedIndex,polar,sectorPath,stopAngle,ease} from './core.js';
+import {createWheelSound} from './sound.js';
 const $=id=>document.getElementById(id),ns='http://www.w3.org/2000/svg',storageKey='spin-studio-v1';
-let items=defaults(),rotation=0,busy=false,sectors=[],labels=[],audio=null,pointerAnimation=null,spinId=0;
+let items=defaults(),rotation=0,busy=false,sectors=[],labels=[],audio=null,wheelSound=null,pointerAnimation=null,spinId=0;
 const spin=$('spin'),itemList=$('items'),error=$('error');
 try{const saved=JSON.parse(localStorage.getItem(storageKey));if(saved&&!validate(saved.items)){items=saved.items.map(x=>({label:x.label,weight:Number(x.weight)}));$('sound').checked=saved.sound===true;}}catch{}
 function save(){try{localStorage.setItem(storageKey,JSON.stringify({items,sound:$('sound').checked}));$('save-state').textContent='已保存';}catch{$('save-state').textContent='仅当前页面有效';}}
@@ -69,11 +70,11 @@ $('count').addEventListener('input',()=>{const n=Number($('count').value);showEr
 $('add').addEventListener('click',()=>changeCount(items.length+1));
 $('equal').addEventListener('click',()=>{if(busy)return;items.forEach(item=>item.weight=1);renderEditor();update();});
 $('reset').addEventListener('click',()=>{if(busy)return;items=defaults();rotation=0;renderEditor();update();});
-$('sound').addEventListener('change',save);
+$('sound').addEventListener('change',()=>{save();if($('sound').checked)prepareSound();});
 function lock(value){busy=value;document.body.classList.toggle('spinning',value);document.querySelectorAll('.editor input,.editor button').forEach(el=>el.disabled=value);spin.disabled=value;spin.querySelector('span').textContent=value?'转动中…':'再转一次';if(!value)updateDisabled();}
 function updateDisabled(){$('add').disabled=items.length>=MAX_ITEMS;itemList.querySelectorAll('.remove').forEach(el=>el.disabled=items.length<=2);}
-function prepareSound(){if(!$('sound').checked)return;try{audio||=new(window.AudioContext||window.webkitAudioContext)();audio.resume().catch(()=>{});}catch{}}
-function tick(){if(!$('sound').checked||!audio||audio.state!=='running')return;try{const t=audio.currentTime,osc=audio.createOscillator(),gain=audio.createGain();osc.type='triangle';osc.frequency.setValueAtTime(1050,t);osc.frequency.exponentialRampToValueAtTime(350,t+.025);gain.gain.setValueAtTime(.035,t);gain.gain.exponentialRampToValueAtTime(.001,t+.035);osc.connect(gain);gain.connect(audio.destination);osc.start(t);osc.stop(t+.04);osc.onended=()=>{osc.disconnect();gain.disconnect();};}catch{}}
+function prepareSound(){if(!$('sound').checked)return;try{audio||=new(window.AudioContext||window.webkitAudioContext)();wheelSound||=createWheelSound(audio);audio.resume().catch(()=>{});}catch{}}
+function tick(){if(!$('sound').checked||!wheelSound)return;try{wheelSound.tick();}catch{}}
 spin.addEventListener('click',()=>{
   if(busy)return;
   const message=validate(items);if(message){showError(message);return;}
