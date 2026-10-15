@@ -6,14 +6,14 @@
   <meta name="theme-color" content="#f4f8ff">
   <meta name="description" content="自定义随机转盘，设置份数、内容与每份大小，按面积公平抽取，文字始终正向显示。">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
-  <title>随转 · 自定义转盘</title>
+  <title>Fate Wheel</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./ui.css">
   <link rel="stylesheet" href="./glass.css">
   <script type="module" src="./app.js"></script>
 </head>
 <body>
-  <header class="topbar"><a class="brand" href="./" aria-label="随转首页"><img src="./favicon.svg" width="32" height="32" alt="">随转</a><span class="local-note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18h12a4 4 0 0 0 0-8 6 6 0 0 0-11.5-2A5 5 0 0 0 6 18Z"/></svg>本地自动保存</span></header>
+  <header class="topbar"><a class="brand" href="./" aria-label="Fate Wheel首页"><img src="./favicon.svg" width="32" height="32" alt="">Fate Wheel</a><span class="local-note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18h12a4 4 0 0 0 0-8 6 6 0 0 0-11.5-2A5 5 0 0 0 6 18Z"/></svg>本地自动保存</span></header>
   <main class="workspace">
     <section class="stage" aria-labelledby="wheel-title">
       <div class="stage-heading"><div><h1 id="wheel-title">今天，转个决定。</h1><p>自定义每一份，让随机刚刚好。</p></div><span id="segment-summary" class="sr-only">10 份</span></div>
@@ -55,6 +55,6 @@
       <div class="editor-footer"><span>支持 2–30 份 · 文字始终正向</span><div><button id="reset" class="text-button" type="button">恢复默认</button><span class="divider">/</span><button id="equal" class="text-button" type="button">全部等分</button></div></div>
     </aside>
   </main>
-  <footer class="page-footer"><span>随转 · 给选择一点偶然</span><span>无需登录，配置只保存在你的浏览器。</span></footer>
+  <footer class="page-footer"><span>Fate Wheel · 给选择一点偶然</span><span>无需登录，配置只保存在你的浏览器。</span></footer>
 </body>
 </html>
