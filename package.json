@@ -1,0 +1,1 @@
+{"name":"spin-studio","version":"1.0.0","private":true,"type":"module","description":"自定义权重随机转盘，无依赖静态网页","scripts":{"start":"python -m http.server 5180 --bind 127.0.0.1","test":"node --test tests/core.test.js"}}

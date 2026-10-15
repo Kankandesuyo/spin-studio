@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f8ff">
+  <meta name="description" content="自定义随机转盘，设置份数、内容与每份大小，按面积公平抽取，文字始终正向显示。">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>随转 · 自定义转盘</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./ui.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="./" aria-label="随转首页"><img src="./favicon.svg" width="32" height="32" alt="">随转</a><span class="local-note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18h12a4 4 0 0 0 0-8 6 6 0 0 0-11.5-2A5 5 0 0 0 6 18Z"/></svg>本地自动保存</span></header>
+  <main class="workspace">
+    <section class="stage" aria-labelledby="wheel-title">
+      <div class="stage-heading"><div><h1 id="wheel-title">今天，转个决定。</h1><p>自定义每一份，让随机刚刚好。</p></div><span id="segment-summary" class="sr-only">10 份</span></div>
+      <div class="wheel-wrap">
+        <svg id="wheel" viewBox="0 0 600 620" role="img" aria-labelledby="wheel-name wheel-desc">
+          <title id="wheel-name">自定义随机转盘</title><desc id="wheel-desc">10 个扇区，5 份换和 5 份不换，各占百分之五十。顶部指针指向最终结果。</desc>
+          <defs>
+            <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffffff"/><stop offset=".55" stop-color="#ffffff"/><stop offset="1" stop-color="#e9f1ff"/></linearGradient>
+            <radialGradient id="hub" cx=".35" cy=".25"><stop stop-color="#fff"/><stop offset=".7" stop-color="#f8fbff"/><stop offset="1" stop-color="#d9e6f7"/></radialGradient>
+            <linearGradient id="pointer-fill" x2=".6" y2="1"><stop stop-color="#4b86ff"/><stop offset="1" stop-color="#1f5df0"/></linearGradient>
+            <radialGradient id="sheen" cx=".32" cy=".18" r=".9"><stop stop-color="#fff" stop-opacity=".08"/><stop offset=".65" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#406ce8" stop-opacity=".06"/></radialGradient>
+          </defs>
+          <ellipse cx="300" cy="566" rx="189" ry="13" fill="#78a3e4" opacity=".07"/>
+          <circle cx="300" cy="305" r="268" fill="#bdd5f6" opacity=".5"/>
+          <circle cx="300" cy="300" r="268" fill="url(#rim)"/>
+          <circle cx="300" cy="300" r="255" fill="#e2edfc"/>
+          <g id="sectors"></g>
+          <circle cx="300" cy="300" r="250" fill="url(#sheen)" pointer-events="none"/>
+          <g id="wheel-labels" aria-hidden="true"></g>
+          <circle cx="301" cy="305" r="44" fill="#416cb2" opacity=".13"/>
+          <circle cx="300" cy="300" r="43" fill="#fff"/>
+          <circle cx="300" cy="300" r="34" fill="url(#hub)" stroke="#edf3fc" stroke-width="1"/>
+          <g id="pointer"><path d="M286 17 Q280 17 284 24 L297 43 Q300 48 303 43 L316 24 Q320 17 314 17 Z" fill="url(#pointer-fill)" stroke="#ffffff" stroke-width="1.5"/></g>
+        </svg>
+      </div>
+      <div class="result" aria-live="polite"><span id="result-caption" hidden></span><strong id="result">准备好了就开始</strong></div>
+      <button id="spin" class="spin-button" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 4 13 8-13 8Z"/></svg><span>开始转动</span></button>
+      <div class="stage-footer"><label class="sound-control"><input id="sound" type="checkbox">播放转动音效</label></div>
+    </section>
+    <aside class="editor" aria-labelledby="editor-title">
+      <div class="editor-heading"><h2 id="editor-title">编辑转盘</h2><span class="saved" id="save-state">已保存</span></div>
+      <div class="count-control"><label for="count">转盘份数</label><div class="count-stepper"><button id="count-minus" type="button" aria-label="减少份数">−</button><input id="count" type="number" min="2" max="30" step="1" value="10"><button id="count-plus" type="button" aria-label="增加份数">＋</button></div><button id="apply-count" class="secondary" type="button">应用</button></div>
+      <div class="column-labels"><span></span><span>内容</span><span>权重</span><span>占比</span><span></span></div>
+      <div id="items"></div>
+      <button id="add" class="add-button" type="button">＋ 添加一份</button>
+      <p id="error" class="error" role="alert" hidden></p>
+      <div class="weight-note"><p>权重越大，扇区越大，被选中的概率越高。<br>例如 1 和 3，分别占 25% 和 75%。</p></div>
+      <div class="editor-footer"><span>支持 2–30 份 · 文字始终正向</span><div><button id="reset" class="text-button" type="button">恢复默认</button><span class="divider">/</span><button id="equal" class="text-button" type="button">全部等分</button></div></div>
+    </aside>
+  </main>
+  <footer class="page-footer"><span>随转 · 给选择一点偶然</span><span>无需登录，配置只保存在你的浏览器。</span></footer>
+</body>
+</html>
