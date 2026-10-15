@@ -9,6 +9,7 @@
   <title>随转 · 自定义转盘</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./ui.css">
+  <link rel="stylesheet" href="./glass.css">
   <script type="module" src="./app.js"></script>
 </head>
 <body>
@@ -20,20 +21,21 @@
         <svg id="wheel" viewBox="0 0 600 620" role="img" aria-labelledby="wheel-name wheel-desc">
           <title id="wheel-name">自定义随机转盘</title><desc id="wheel-desc">10 个扇区，5 份换和 5 份不换，各占百分之五十。顶部指针指向最终结果。</desc>
           <defs>
-            <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffffff"/><stop offset=".55" stop-color="#ffffff"/><stop offset="1" stop-color="#e9f1ff"/></linearGradient>
-            <radialGradient id="hub" cx=".35" cy=".25"><stop stop-color="#fff"/><stop offset=".7" stop-color="#f8fbff"/><stop offset="1" stop-color="#d9e6f7"/></radialGradient>
+            <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffffff" stop-opacity=".98"/><stop offset=".23" stop-color="#eff7ff" stop-opacity=".45"/><stop offset=".43" stop-color="#ffffff" stop-opacity=".9"/><stop offset=".7" stop-color="#d0e5ff" stop-opacity=".4"/><stop offset="1" stop-color="#ffffff" stop-opacity=".88"/></linearGradient>
+            <radialGradient id="hub" cx=".3" cy=".2"><stop stop-color="#fff" stop-opacity=".98"/><stop offset=".55" stop-color="#f7fbff" stop-opacity=".7"/><stop offset=".85" stop-color="#bbd5f7" stop-opacity=".6"/><stop offset="1" stop-color="#fff" stop-opacity=".92"/></radialGradient>
             <linearGradient id="pointer-fill" x2=".6" y2="1"><stop stop-color="#4b86ff"/><stop offset="1" stop-color="#1f5df0"/></linearGradient>
             <radialGradient id="sheen" cx=".32" cy=".18" r=".9"><stop stop-color="#fff" stop-opacity=".08"/><stop offset=".65" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#406ce8" stop-opacity=".06"/></radialGradient>
           </defs>
           <ellipse cx="300" cy="566" rx="189" ry="13" fill="#78a3e4" opacity=".07"/>
           <circle cx="300" cy="305" r="268" fill="#bdd5f6" opacity=".5"/>
           <circle cx="300" cy="300" r="268" fill="url(#rim)"/>
+          <circle cx="300" cy="300" r="267" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="1.5"/>
           <circle cx="300" cy="300" r="255" fill="#e2edfc"/>
           <g id="sectors"></g>
           <circle cx="300" cy="300" r="250" fill="url(#sheen)" pointer-events="none"/>
           <g id="wheel-labels" aria-hidden="true"></g>
           <circle cx="301" cy="305" r="44" fill="#416cb2" opacity=".13"/>
-          <circle cx="300" cy="300" r="43" fill="#fff"/>
+          <circle cx="300" cy="300" r="43" fill="#fff" fill-opacity=".58" stroke="#ffffff" stroke-opacity=".9" stroke-width="1.2"/>
           <circle cx="300" cy="300" r="34" fill="url(#hub)" stroke="#edf3fc" stroke-width="1"/>
           <g id="pointer"><path d="M286 17 Q280 17 284 24 L297 43 Q300 48 303 43 L316 24 Q320 17 314 17 Z" fill="url(#pointer-fill)" stroke="#ffffff" stroke-width="1.5"/></g>
         </svg>

@@ -18,6 +18,7 @@
 
 - `index.html`：页面布局与转盘结构。
 - `ui.css`：桌面与手机样式。
+- `glass.css`：按 Liquid Glass 原则实现的网页材质层，包含背景模糊、边缘高光、交互反射、深色模式与无模糊降级；不是 iOS 原生 API。
 - `core.js`：权重、扇区几何和抽取定位。
 - `app.js`：编辑、动画、音效与本地保存。
 - `tests/core.test.js`：计算逻辑验证。

@@ -98,4 +98,12 @@ spin.addEventListener('click',()=>{
   }
   requestAnimationFrame(frame);
 });
+// Light follows the pointer only on the primary interactive glass surface.
+let shineFrame=0,shinePoint=null;
+spin.addEventListener('pointermove',event=>{
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const box=spin.getBoundingClientRect();shinePoint={x:(event.clientX-box.left)/box.width*100,y:(event.clientY-box.top)/box.height*100};
+  if(!shineFrame)shineFrame=requestAnimationFrame(()=>{shineFrame=0;if(shinePoint){spin.style.setProperty('--shine-x',shinePoint.x+'%');spin.style.setProperty('--shine-y',shinePoint.y+'%');}});
+});
+spin.addEventListener('pointerleave',()=>{shinePoint=null;spin.style.removeProperty('--shine-x');spin.style.removeProperty('--shine-y');});
 renderEditor();update();
